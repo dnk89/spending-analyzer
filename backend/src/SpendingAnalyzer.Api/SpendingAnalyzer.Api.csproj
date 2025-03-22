@@ -1,25 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+&lt;Project Sdk="Microsoft.NET.Sdk.Web"&gt;
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <InvariantGlobalization>false</InvariantGlobalization>
-  </PropertyGroup>
+  &lt;PropertyGroup&gt;
+    &lt;TargetFramework&gt;net8.0&lt;/TargetFramework&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+    &lt;InvariantGlobalization&gt;false&lt;/InvariantGlobalization&gt;
+  &lt;/PropertyGroup&gt;
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-  </ItemGroup>
+  &lt;ItemGroup&gt;
+    &lt;PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.3" /&gt;
+    &lt;PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3"&gt;
+      &lt;IncludeAssets&gt;runtime; build; native; contentfiles; analyzers; buildtransitive&lt;/IncludeAssets&gt;
+      &lt;PrivateAssets&gt;all&lt;/PrivateAssets&gt;
+    &lt;/PackageReference&gt;
+    &lt;PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" /&gt;
+    &lt;PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" /&gt;
+  &lt;/ItemGroup&gt;
 
-  <ItemGroup>
-    <ProjectReference Include="..\SpendingAnalyzer.Core\SpendingAnalyzer.Core.csproj" />
-    <ProjectReference Include="..\SpendingAnalyzer.Infrastructure\SpendingAnalyzer.Infrastructure.csproj" />
-  </ItemGroup>
+  &lt;ItemGroup&gt;
+    &lt;ProjectReference Include="..\SpendingAnalyzer.Core\SpendingAnalyzer.Core.csproj" /&gt;
+    &lt;ProjectReference Include="..\SpendingAnalyzer.Infrastructure\SpendingAnalyzer.Infrastructure.csproj" /&gt;
+  &lt;/ItemGroup&gt;
 
-</Project>
+&lt;/Project&gt;
