@@ -8,6 +8,10 @@
 
   &lt;ItemGroup&gt;
     &lt;PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" /&gt;
+    &lt;PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3"&gt;
+      &lt;IncludeAssets&gt;runtime; build; native; contentfiles; analyzers; buildtransitive&lt;/IncludeAssets&gt;
+      &lt;PrivateAssets&gt;all&lt;/PrivateAssets&gt;
+    &lt;/PackageReference&gt;
     &lt;PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" /&gt;
   &lt;/ItemGroup&gt;
 
