@@ -1,124 +1,101 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState } from 'react';
 
-interface Props {
+interface TransactionUploadProps {
   onUploadSuccess: () => void;
 }
 
-export default function TransactionUpload({ onUploadSuccess }: Props) {
+const TransactionUpload: React.FC<TransactionUploadProps> = ({ onUploadSuccess }) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [success, setSuccess] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setFile(event.target.files[0]);
       setError(null);
+      setSuccess(false);
     }
   };
 
   const handleUpload = async () => {
     if (!file) {
-      setError('Please select a file');
+      setError('Please select a file to upload');
       return;
     }
+
+    setUploading(true);
+    setError(null);
+    setSuccess(false);
 
     const formData = new FormData();
     formData.append('file', file);
 
-    setUploading(true);
-    setError(null);
-
     try {
-      await axios.post('http://localhost:5000/api/transactions/import', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const response = await fetch('http://localhost:5000/api/transactions/upload', {
+        method: 'POST',
+        body: formData,
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to upload transactions');
+      }
+
+      setSuccess(true);
+      setFile(null);
       onUploadSuccess();
-      navigate('/transactions');
     } catch (err) {
-      setError('Failed to upload file. Please make sure it\'s a valid CSV file.');
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-white shadow rounded-lg p-6">
-      <h2 className="text-2xl font-bold mb-6">Upload Transactions</h2>
-      
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            CSV File
-          </label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-            <div className="space-y-1 text-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div className="flex text-sm text-gray-600">
-                <label
-                  htmlFor="file-upload"
-                  className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                >
-                  <span>Upload a file</span>
-                  <input
-                    id="file-upload"
-                    name="file-upload"
-                    type="file"
-                    className="sr-only"
-                    accept=".csv"
-                    onChange={handleFileChange}
-                  />
-                </label>
-                <p className="pl-1">or drag and drop</p>
-              </div>
-              <p className="text-xs text-gray-500">CSV files only</p>
+    <div className="max-w-xl mx-auto">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Upload Transactions</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Transaction File
+            </label>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileChange}
+              className="mt-1 block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-blue-50 file:text-blue-700
+                hover:file:bg-blue-100"
+            />
+          </div>
+          <button
+            onClick={handleUpload}
+            disabled={!file || uploading}
+            className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
+              ${
+                !file || uploading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+          >
+            {uploading ? 'Uploading...' : 'Upload'}
+          </button>
+          {error && (
+            <div className="text-red-500 text-sm">{error}</div>
+          )}
+          {success && (
+            <div className="text-green-500 text-sm">
+              Transactions uploaded successfully!
             </div>
-          </div>
+          )}
         </div>
-
-        {file && (
-          <div className="text-sm text-gray-600">
-            Selected file: {file.name}
-          </div>
-        )}
-
-        {error && (
-          <div className="text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={handleUpload}
-          disabled={!file || uploading}
-          className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-            !file || uploading
-              ? 'bg-indigo-400 cursor-not-allowed'
-              : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-          }`}
-        >
-          {uploading ? 'Uploading...' : 'Upload'}
-        </button>
       </div>
     </div>
   );
-}
+};
+
+export default TransactionUpload;
