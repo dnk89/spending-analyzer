@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using SpendingAnalyzer.Core.Services;
 using SpendingAnalyzer.Infrastructure.Data;
+using SpendingAnalyzer.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,14 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add database context
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Add application services
-builder.Services.AddScoped<CsvImportService>();
-
-// Add CORS
+// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -26,6 +19,13 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+// Configure database
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register services
+builder.Services.AddScoped<CsvImportService>();
 
 var app = builder.Build();
 
@@ -41,11 +41,11 @@ app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
 
-// Apply migrations
+// Ensure database is created and migrations are applied
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
 }
 
 app.Run();
