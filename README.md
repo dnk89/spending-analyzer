@@ -1,69 +1,87 @@
 # Spending Analyzer
 
-A web application for analyzing and categorizing personal spending from bank statements.
+A full-stack application for analyzing personal spending with .NET backend and React frontend.
 
 ## Features
 
-- Import bank statement CSV files
+- Upload and manage transactions
+- View spending analytics and trends
 - Categorize transactions
-- View spending summaries and analytics
-- Docker support for easy deployment
+- Interactive dashboard with charts and statistics
 
-## Technology Stack
-
-### Backend
-- ASP.NET Core Web API
-- Entity Framework Core
-- PostgreSQL
-- Docker
+## Tech Stack
 
 ### Frontend
 - React with TypeScript
-- Tailwind CSS
-- Chart.js for visualizations
+- Tailwind CSS for styling
+- React Router for navigation
+- Modern component architecture
+
+### Backend
+- .NET 8.0 Web API
+- Entity Framework Core
+- PostgreSQL database
+- Clean architecture pattern
 
 ## Getting Started
 
 ### Prerequisites
-
 - Docker and Docker Compose
-- .NET 8 SDK (for local development)
-- Node.js (for local frontend development)
+- Node.js (for local development)
+- .NET SDK 8.0 (for local development)
 
 ### Running with Docker
-
-```bash
-docker-compose up
-```
-
-The application will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
+1. Clone the repository
+2. Navigate to the root directory
+3. Run `docker-compose up -d`
+4. Access the application at `http://localhost:3000`
 
 ### Local Development
+1. Frontend:
+   ```bash
+   cd frontend
+   npm install
+   npm start
+   ```
 
-#### Backend
-```bash
-cd backend
-dotnet run
-```
+2. Backend:
+   ```bash
+   cd backend
+   dotnet restore
+   cd src/SpendingAnalyzer.Api
+   dotnet run
+   ```
 
-#### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+3. Database:
+   ```bash
+   docker-compose up db -d
+   ```
 
 ## Project Structure
 
 ```
-├── backend/                 # ASP.NET Core Web API
-│   ├── src/                # Source code
-│   └── tests/              # Unit and integration tests
-├── frontend/               # React frontend
-│   ├── src/                # Source code
-│   └── public/             # Static assets
-├── docker-compose.yml      # Docker composition
-└── README.md              # This file
+.
+├── frontend/                # React frontend application
+│   ├── src/                # Source files
+│   │   ├── components/     # React components
+│   │   └── ...
+│   └── ...
+├── backend/                # .NET backend application
+│   └── src/
+│       ├── SpendingAnalyzer.Api/           # Web API project
+│       ├── SpendingAnalyzer.Core/          # Domain models and interfaces
+│       └── SpendingAnalyzer.Infrastructure/ # Data access and implementation
+└── docker-compose.yml      # Docker compose configuration
 ```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
