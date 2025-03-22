@@ -38,12 +38,72 @@ public class TransactionsController : ControllerBase
         return transaction;
     }
 
+    [HttpPost]
+    public async Task<ActionResult<Transaction>> CreateTransaction(Transaction transaction)
+    {
+        transaction.CreatedAt = DateTime.UtcNow;
+        transaction.UpdatedAt = DateTime.UtcNow;
+        
+        _context.Transactions.Add(transaction);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetTransaction), new { id = transaction.Id }, transaction);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateTransaction(int id, Transaction transaction)
+    {
+        if (id != transaction.Id)
+        {
+            return BadRequest();
+        }
+
+        transaction.UpdatedAt = DateTime.UtcNow;
+        _context.Entry(transaction).State = EntityState.Modified;
+        _context.Entry(transaction).Property(x => x.CreatedAt).IsModified = false;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!await TransactionExists(id))
+            {
+                return NotFound();
+            }
+            throw;
+        }
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTransaction(int id)
+    {
+        var transaction = await _context.Transactions.FindAsync(id);
+        if (transaction == null)
+        {
+            return NotFound();
+        }
+
+        _context.Transactions.Remove(transaction);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpPost("import")]
-    public async Task<IActionResult> ImportTransactions(IFormFile file)
+    public async Task<ActionResult<IEnumerable<Transaction>>> ImportTransactions(IFormFile file)
     {
         if (file == null || file.Length == 0)
         {
             return BadRequest("No file uploaded");
+        }
+
+        if (!file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest("Only CSV files are supported");
         }
 
         try
@@ -52,7 +112,7 @@ public class TransactionsController : ControllerBase
             await _context.Transactions.AddRangeAsync(transactions);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = $"Successfully imported {transactions.Count} transactions" });
+            return Ok(transactions);
         }
         catch (Exception ex)
         {
@@ -60,73 +120,8 @@ public class TransactionsController : ControllerBase
         }
     }
 
-    [HttpPut("{id}/category")]
-    public async Task<IActionResult> UpdateCategory(int id, [FromBody] string category)
+    private async Task<bool> TransactionExists(int id)
     {
-        var transaction = await _context.Transactions.FindAsync(id);
-
-        if (transaction == null)
-        {
-            return NotFound();
-        }
-
-        transaction.Category = category;
-        transaction.UpdatedAt = DateTime.UtcNow;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-            return Ok(transaction);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!TransactionExists(id))
-            {
-                return NotFound();
-            }
-            throw;
-        }
-    }
-
-    [HttpGet("summary")]
-    public async Task<ActionResult<object>> GetSummary([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
-    {
-        var query = _context.Transactions.AsQueryable();
-
-        if (startDate.HasValue)
-        {
-            query = query.Where(t => t.Date >= startDate.Value);
-        }
-
-        if (endDate.HasValue)
-        {
-            query = query.Where(t => t.Date <= endDate.Value);
-        }
-
-        var transactions = await query.ToListAsync();
-
-        var summary = new
-        {
-            TotalSpending = transactions.Sum(t => t.Amount),
-            CategoryCount = transactions.Select(t => t.Category).Distinct().Count(),
-            TransactionCount = transactions.Count,
-            SpendingByCategory = transactions
-                .GroupBy(t => t.Category)
-                .Select(g => new
-                {
-                    Category = g.Key,
-                    Amount = g.Sum(t => t.Amount),
-                    Count = g.Count()
-                })
-                .OrderByDescending(x => x.Amount)
-                .ToList()
-        };
-
-        return Ok(summary);
-    }
-
-    private bool TransactionExists(int id)
-    {
-        return _context.Transactions.Any(e => e.Id == id);
+        return await _context.Transactions.AnyAsync(e => e.Id == id);
     }
 }
