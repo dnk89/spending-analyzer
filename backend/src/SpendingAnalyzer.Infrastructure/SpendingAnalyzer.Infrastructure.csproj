@@ -1,22 +1,19 @@
-&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+<Project Sdk="Microsoft.NET.Sdk">
 
-  &lt;PropertyGroup&gt;
-    &lt;TargetFramework&gt;net8.0&lt;/TargetFramework&gt;
-    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
-    &lt;Nullable&gt;enable&lt;/Nullable&gt;
-  &lt;/PropertyGroup&gt;
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
-  &lt;ItemGroup&gt;
-    &lt;PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" /&gt;
-    &lt;PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3"&gt;
-      &lt;IncludeAssets&gt;runtime; build; native; contentfiles; analyzers; buildtransitive&lt;/IncludeAssets&gt;
-      &lt;PrivateAssets&gt;all&lt;/PrivateAssets&gt;
-    &lt;/PackageReference&gt;
-    &lt;PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" /&gt;
-  &lt;/ItemGroup&gt;
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+  </ItemGroup>
 
-  &lt;ItemGroup&gt;
-    &lt;ProjectReference Include="..\SpendingAnalyzer.Core\SpendingAnalyzer.Core.csproj" /&gt;
-  &lt;/ItemGroup&gt;
+  <ItemGroup>
+    <ProjectReference Include="../SpendingAnalyzer.Core/SpendingAnalyzer.Core.csproj" />
+  </ItemGroup>
 
-&lt;/Project&gt;
+</Project>

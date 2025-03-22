@@ -1,21 +1,18 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy solution and project files first
-COPY backend/src/SpendingAnalyzer.Api/SpendingAnalyzer.Api.csproj src/SpendingAnalyzer.Api/
-COPY backend/src/SpendingAnalyzer.Core/SpendingAnalyzer.Core.csproj src/SpendingAnalyzer.Core/
-COPY backend/src/SpendingAnalyzer.Infrastructure/SpendingAnalyzer.Infrastructure.csproj src/SpendingAnalyzer.Infrastructure/
+COPY ["src/SpendingAnalyzer.Core/SpendingAnalyzer.Core.csproj", "SpendingAnalyzer.Core/"]
+COPY ["src/SpendingAnalyzer.Infrastructure/SpendingAnalyzer.Infrastructure.csproj", "SpendingAnalyzer.Infrastructure/"]
+COPY ["src/SpendingAnalyzer.Api/SpendingAnalyzer.Api.csproj", "SpendingAnalyzer.Api/"]
+RUN dotnet restore "SpendingAnalyzer.Api/SpendingAnalyzer.Api.csproj"
 
-# Restore dependencies
-RUN dotnet restore src/SpendingAnalyzer.Api/SpendingAnalyzer.Api.csproj
+COPY src/. ./
+RUN dotnet build "SpendingAnalyzer.Api/SpendingAnalyzer.Api.csproj" -c Release -o /app/build
 
-# Copy the rest of the source code
-COPY backend/src/ src/
+FROM build AS publish
+RUN dotnet publish "SpendingAnalyzer.Api/SpendingAnalyzer.Api.csproj" -c Release -o /app/publish
 
-# Build and publish
-RUN dotnet publish src/SpendingAnalyzer.Api/SpendingAnalyzer.Api.csproj -c Release -o /app/publish
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "SpendingAnalyzer.Api.dll"]

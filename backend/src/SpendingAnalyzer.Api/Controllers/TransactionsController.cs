@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SpendingAnalyzer.Core.Models;
 using SpendingAnalyzer.Infrastructure.Data;
-using SpendingAnalyzer.Infrastructure.Services;
 
 namespace SpendingAnalyzer.Api.Controllers;
 
@@ -11,18 +10,18 @@ namespace SpendingAnalyzer.Api.Controllers;
 public class TransactionsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
-    private readonly CsvImportService _csvImportService;
 
-    public TransactionsController(ApplicationDbContext context, CsvImportService csvImportService)
+    public TransactionsController(ApplicationDbContext context)
     {
         _context = context;
-        _csvImportService = csvImportService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactions()
     {
-        return await _context.Transactions.OrderByDescending(t => t.Date).ToListAsync();
+        return await _context.Transactions
+            .OrderByDescending(t => t.Date)
+            .ToListAsync();
     }
 
     [HttpGet("{id}")]
@@ -41,9 +40,6 @@ public class TransactionsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Transaction>> CreateTransaction(Transaction transaction)
     {
-        transaction.CreatedAt = DateTime.UtcNow;
-        transaction.UpdatedAt = DateTime.UtcNow;
-        
         _context.Transactions.Add(transaction);
         await _context.SaveChangesAsync();
 
@@ -58,9 +54,7 @@ public class TransactionsController : ControllerBase
             return BadRequest();
         }
 
-        transaction.UpdatedAt = DateTime.UtcNow;
         _context.Entry(transaction).State = EntityState.Modified;
-        _context.Entry(transaction).Property(x => x.CreatedAt).IsModified = false;
 
         try
         {
@@ -68,11 +62,14 @@ public class TransactionsController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!await TransactionExists(id))
+            if (!TransactionExists(id))
             {
                 return NotFound();
             }
-            throw;
+            else
+            {
+                throw;
+            }
         }
 
         return NoContent();
@@ -93,35 +90,8 @@ public class TransactionsController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("import")]
-    public async Task<ActionResult<IEnumerable<Transaction>>> ImportTransactions(IFormFile file)
+    private bool TransactionExists(int id)
     {
-        if (file == null || file.Length == 0)
-        {
-            return BadRequest("No file uploaded");
-        }
-
-        if (!file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
-        {
-            return BadRequest("Only CSV files are supported");
-        }
-
-        try
-        {
-            var transactions = await _csvImportService.ImportTransactionsFromCsvAsync(file);
-            await _context.Transactions.AddRangeAsync(transactions);
-            await _context.SaveChangesAsync();
-
-            return Ok(transactions);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest($"Error importing transactions: {ex.Message}");
-        }
-    }
-
-    private async Task<bool> TransactionExists(int id)
-    {
-        return await _context.Transactions.AnyAsync(e => e.Id == id);
+        return _context.Transactions.Any(e => e.Id == id);
     }
 }
